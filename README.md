@@ -106,3 +106,50 @@ implement only two methods (more if you need):
 
 The session id goes "as is" to the cookie, so it's up to you to
 protect them if they are sensible enough.
+
+## Using SimpleSessionMiddleware
+
+The SimpleSessionMiddleware offers a similar API for storing sessions.
+But instead of using a factory class, it uses a more Pythonic approach
+and merges Factory and Session to one class. The complexity is hidden
+by using the `SessionManager` class.
+If you read the code, you'll see that `SimpleSession` actually added the two
+methods `load` and `save` from the class `Factory`. To use that session class
+you need to use a `SessionManager` which implements only 3 methods. All of those
+are magic methods. As an example see `DictBasedSessionManager` which keeps
+all session information in a dictionary residing in memory as long as your
+application is a live. It is easy to create session based classes that save
+the information in MongoDB, Redis or any other database (SQL or NoSQL).
+Here is an example application using the new `SimpleSessionMiddleware`:
+
+```
+from wsgiref.simple_server import make_server
+from wsgisession import SimpleSessionMiddleware
+
+
+def wrapped_app(environ, start_response):
+    session = environ.get('wsgisession')
+    # google chrome sends 2 requests ...
+    if environ['PATH_INFO'] != '/favicon.ico':
+        session['counter'] = session.get('counter', 0) + 1
+
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return ['Visited {} times\n'.format(session['counter']).encode()]
+
+
+# this will use the default session manager
+app = SimpleSessionMiddleware(wrapped_app)
+
+
+if __name__ == '__main__':
+    httpd = make_server('localhost', 8080, app)
+    print("Listening on http://localhost:8080")
+    httpd.serve_forever()
+```
+
+Assuming you have implemented a session manager to save session information
+in Redis:
+
+```
+app = SimpleSessionMiddleware(wrapped_app, RedisSessionManager)
+```
