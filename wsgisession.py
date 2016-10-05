@@ -66,10 +66,10 @@ class SimpleSession(object):
 
     __slots__ = ('id', 'data', 'manager')
 
-    def __init__(self, manager):
+    def __init__(self, manager_inst):
         self.id = None
         self.data = {}
-        self.manager = manager()
+        self.manager = manager_inst
 
     def __getitem__(self, key):
         return self.data[key]
@@ -108,7 +108,7 @@ class SimpleSessionMiddleware(object):
         self.app = app
         self.env_key = env_key
         self.cookie_key = cookie_key
-        self.manager = session_manager
+        self.manager = session_manager()
 
     def __call__(self, environ, start_response):
         cookie = SimpleCookie()
