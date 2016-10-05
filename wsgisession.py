@@ -44,6 +44,8 @@ class DictBasedSessionManager(BaseSessionManager):
 
 class Session(object):
 
+    __slots__ = ('id', 'data')
+
     def __init__(self):
         self.id = None
         self.data = {}
@@ -61,6 +63,8 @@ class Session(object):
 
 
 class SimpleSession(object):
+
+    __slots__ = ('id', 'data', 'manager')
 
     def __init__(self, manager):
         self.id = None
