@@ -1,3 +1,4 @@
+import inspect
 import uuid
 
 try:
@@ -6,25 +7,25 @@ except ImportError:
     from http.cookies import SimpleCookie
 
 
-class BaseSessionManager(object):
+class BaseSessionMeta(type):
 
-    def __init__(self, *args, **kwargs):
-        """
-        Use this to create database connections, etc.
-        """
-        pass
+    def __new__(meta, name, bases, class_dict):
+        # Don’t validate the abstract BaseSession class
+        if bases != (object,):
+            for item in ['__setitem__', '__getitem__', '__contains__']:
+                method = class_dict.get(item)
+                if not method or not inspect.isfunction(method):
+                    raise ValueError(
+                        '{} must define a method called {}'.format(name, item))
 
-    def __setitem__(self, id, data):
-        raise RuntimeError("Session manager must override __setitem__")
-
-    def __getitem__(self, id):
-        raise RuntimeError("Session manager must override __getitem__")
-
-    def __contains__(self, id):
-        raise RuntimeError("Session manager must override __contains__")
+        return type.__new__(meta, name, bases, class_dict)
 
 
-class DictBasedSessionManager(BaseSessionManager):
+class BaseSession(object, metaclass=BaseSessionMeta):
+    pass
+
+
+class DictBasedSessionManager(BaseSession):
 
     sessions = {}
 
