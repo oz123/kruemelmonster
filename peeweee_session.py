@@ -3,7 +3,6 @@ This file is distributed under the terms of the LGPL v3.
 Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
 import datetime
-
 import peewee as pw
 from wsgisession import BaseSession
 
@@ -40,19 +39,31 @@ class PeeweeSession(pw.Model):
         db_table = 'sessions'
 
 
-def create_tables():
-    db.connect()
-    db.create_tables([PeeweeSession], safe=True)
-
-create_tables()
-
-
 class SqliteSessionManager(BaseSession):
 
+    """
+    SqliteSessionManager - a session manager that uses SQLite.
+    """
+
     def __init__(self, db, model, ttl=None, ttl_unit='minutes'):
+        """
+        :param db: a DataBase instance
+        :param model: a Model instance
+
+        Both model and db are currently use Peewee ORM, but it's easy to
+        change this to another ORM.
+        """
+
         self.db = db
         self.model = model
-        if ttl and isinstance(ttl, int) and ttl_unit in UNITS:
+        self.db.connect()
+        self.db.create_tables([model], safe=True)
+
+        if ttl and not isinstance(ttl, int):
+            raise ValueError("ttl must be an integer.")
+        if ttl_unit not in UNITS:
+            raise ValueError("Illegal ttl_unit.")
+        if ttl:
             self.model.raw(
                 TRIGGER_SQL.format(ttl, ttl_unit)
                            ).execute()
