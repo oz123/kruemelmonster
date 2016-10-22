@@ -16,6 +16,9 @@ BEGIN
 DELETE FROM sessions WHERE DATETIME(timestamp) <= DATETIME('now', '-{} {}');
 END;
 """
+
+# select strftime('%s', 'now') - strftime('%s', DATETIME('NOW', '-1 days'));
+
 # TODO:
 #
 # * Add trigger to remove old sessions
