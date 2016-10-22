@@ -7,7 +7,7 @@ import peewee as pw
 from wsgisession import BaseSession
 
 DATABASE = 'sessions.db'
-UNITS = ['days', 'hours', 'minutes', 'seconds']
+UNITS = ('days', 'hours', 'minutes', 'seconds')
 
 TRIGGER_SQL = """
 CREATE TRIGGER IF NOT EXISTS clean_old_sessions
