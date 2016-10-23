@@ -4,7 +4,7 @@ Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
 import datetime
 import peewee as pw
-from wsgisession import BaseSession
+from base import BaseSession
 
 DATABASE = 'sessions.db'
 UNITS = ('days', 'hours', 'minutes', 'seconds')
@@ -21,7 +21,6 @@ END;
 
 # TODO:
 #
-# * Add trigger to remove old sessions
 # * Add tests
 # * Add support for json field
 #
