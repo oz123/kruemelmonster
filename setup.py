@@ -1,15 +1,16 @@
-from distutils.core import setup
+from setuptools import setup
+from setuptools import find_packages
 
 setup(
-    name='WSGISession',
-    version='0.1.1',
-    author='Gerard Monells',
-    author_email='gerard.monells@gmail.com',
-    url='https://github.com/Sirtea/WSGISession',
-    py_modules=['wsgisession'],
-    license='MIT license',
+    name='krunmelmonster',
+    version='0.0.2',
+    author='Oz Tiram',
+    author_email='oz.tiram@gmail.com',
+    url='https://github.com/oz123/krumelmonster',
+    packages=find_packages(exclude=['tests']),
+    license='LGPL',
     description='WSGI sessions implentation (session id in a cookie).',
     long_description=open('README.txt').read(),
     platforms='any',
-    download_url='http://pypi.python.org/pypi/WSGISession/',
+    download_url='http://pypi.python.org/pypi/krumelmonster/',
 )
