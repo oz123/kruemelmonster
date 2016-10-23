@@ -4,7 +4,8 @@ Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
 import datetime
 import peewee as pw
-from base import BaseSession
+
+from .base import BaseSession
 
 DATABASE = 'sessions.db'
 UNITS = ('days', 'hours', 'minutes', 'seconds')
