@@ -71,14 +71,21 @@ class SqliteSessionManager(BaseSession):
                 TRIGGER_SQL.format(ttl, ttl_unit)
                            ).execute()
 
+        db.close()
+
     def __setitem__(self, id, data):
+        self.db.connect()
         self.model.create(id=id, data=data).save()
+        db.close()
 
     def __getitem__(self, id):
-        return self.model.select().where(self.model.id == id).get().data
+        self.db.connect()
+        data = self.model.select().where(self.model.id == id).get().data
+        db.close()
+        return data
 
     def __contains__(self, id):
-        if self.select().where(self.model.id == id).exists():
-            return True
-        else:
-            return False
+        self.db.connect()
+        rv = self.model.select().where(self.model.id == id).exists()
+        db.close()
+        return rv

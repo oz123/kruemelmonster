@@ -38,7 +38,7 @@ class DictBasedSessionManager(BaseSession):
             return False
 
 
-class Session(object):
+class Session:
 
     __slots__ = ('id', 'data')
 
@@ -58,7 +58,7 @@ class Session(object):
         return default
 
 
-class SimpleSession(object):
+class SimpleSession:
 
     __slots__ = ('id', 'data', 'manager')
 
