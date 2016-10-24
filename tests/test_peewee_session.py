@@ -13,4 +13,4 @@ session_manager = SqliteSessionManager(db, PeeweeSession,
                                        ttl=60, ttl_unit='seconds')
 
 
-assert os.path.exists('test.db')
+assert os.path.exists('sessions.db')
