@@ -8,10 +8,15 @@ import sqlite3
 import os
 from krumelmonster.sessions import SqliteSessionManager, PeeweeSession, db
 
+session_manager = None
 
-session_manager = SqliteSessionManager(db, PeeweeSession,
-                                       ttl=60, ttl_unit='seconds')
+def setup_module(module):
+    global session_manager
+    session_manager = SqliteSessionManager(db, PeeweeSession,
+                                           ttl=60, ttl_unit='seconds')
 
+def teardown_module(module):
+    os.unlink('sessions.db')
 
 
 def test_session_db_created():
@@ -19,13 +24,20 @@ def test_session_db_created():
 
 
 def test_session_db_is_not_locked():
-    assert False
-
+    session_manager['abc'] = "it works"
+    session_manager['def'] = "it works too"
+    # the above assignments should work
+    assert True
 
 def test_sessions_inserted():
-    assert False
+    conn = sqlite3.connect('sessions.db')
+    cur = conn.cursor()
+    cur.execute("select id, data from sessions;")
+    sid, data = cur.fetchone()
+    assert (sid, data) == ("abc", "it works")
 
 
 def test_trigger_works():
     # add trigger
     assert False
+
