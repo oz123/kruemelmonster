@@ -1,6 +1,6 @@
 .PHONY: clean-pyc clean-build docs clean test coverage coverage-run
 
-PACKAGE=krumelmonster
+PACKAGE=kruemelmonster
 
 help:
 	@echo "clean-build - remove build artifacts"

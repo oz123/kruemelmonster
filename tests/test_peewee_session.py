@@ -3,7 +3,7 @@ import os
 import sqlite3
 import time
 
-from krumelmonster.sessions import SqliteSessionManager, PeeweeSession, db
+from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession, db
 
 session_manager = None
 
