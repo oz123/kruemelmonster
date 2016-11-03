@@ -1,11 +1,8 @@
-# TODO: create sessions database
-# TODO: test that sessions are inserted
-# TODO: add trigger
-# TODO: insert old sessions
-# TODO: see if sessions are deleted
 import datetime as dt
-import sqlite3
 import os
+import sqlite3
+import time
+
 from krumelmonster.sessions import SqliteSessionManager, PeeweeSession, db
 
 session_manager = None
@@ -13,7 +10,7 @@ session_manager = None
 def setup_module(module):
     global session_manager
     session_manager = SqliteSessionManager(db, PeeweeSession,
-                                           ttl=60, ttl_unit='seconds')
+                                           ttl=None, ttl_unit='seconds')
 
 def teardown_module(module):
     os.unlink('sessions.db')
@@ -29,15 +26,33 @@ def test_session_db_is_not_locked():
     # the above assignments should work
     assert True
 
+
+def test_no_trigger():
+    "session manager should not have a trigger if not specified"
+    conn = sqlite3.connect('sessions.db')
+    cursor = conn.cursor()
+    sql = "select name from sqlite_master where type = 'trigger';"
+    cursor.execute(sql)
+    data = cursor.fetchone()
+    assert data is None
+
 def test_sessions_inserted():
     conn = sqlite3.connect('sessions.db')
-    cur = conn.cursor()
-    cur.execute("select id, data from sessions;")
-    sid, data = cur.fetchone()
+    cursor = conn.cursor()
+    cursor.execute("select id, data from sessions;")
+    sid, data = cursor.fetchone()
     assert (sid, data) == ("abc", "it works")
-
 
 def test_trigger_works():
     # add trigger
-    assert False
+    session_manager = SqliteSessionManager(db, PeeweeSession,
+                                           ttl=1, ttl_unit='seconds')
+    conn = sqlite3.connect('sessions.db')
+    cursor = conn.cursor()
+    time.sleep(1)
+    session_manager['this'] = "deletes other sessions"
+    cursor = conn.cursor()
+    cursor.execute("select id from sessions;")
+    data = cursor.fetchall()[0]
+    assert data not in ("abc", "def")
 
