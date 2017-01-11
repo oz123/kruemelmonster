@@ -5,15 +5,16 @@ import time
 
 from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession, db
 
+dbname = "foobar.db"
 session_manager = None
 
 def setup_module(module):
     global session_manager
-    session_manager = SqliteSessionManager(db, PeeweeSession,
+    session_manager = SqliteSessionManager("foobar.db", PeeweeSession,
                                            ttl=None, ttl_unit='seconds')
 
-def teardown_module(module):
-    os.unlink('sessions.db')
+#def teardown_module(module):
+#    os.unlink('sessions.db')
 
 
 def test_session_db_created():
@@ -37,7 +38,7 @@ def test_no_trigger():
     assert data is None
 
 def test_sessions_inserted():
-    conn = sqlite3.connect('sessions.db')
+    conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
     cursor.execute("select id, data from sessions;")
     sid, data = cursor.fetchone()
@@ -45,9 +46,9 @@ def test_sessions_inserted():
 
 def test_trigger_works():
     # add trigger
-    session_manager = SqliteSessionManager(db, PeeweeSession,
+    session_manager = SqliteSessionManager(dbname, PeeweeSession,
                                            ttl=1, ttl_unit='seconds')
-    conn = sqlite3.connect('sessions.db')
+    conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
     time.sleep(1)
     session_manager['this'] = "deletes other sessions"

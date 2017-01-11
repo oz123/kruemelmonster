@@ -38,7 +38,7 @@ class PeeweeSession(pw.Model):
     data = pw.TextField()
 
     class Meta(object):
-        database = db
+        database = None
         db_table = 'sessions'
 
 
@@ -48,17 +48,19 @@ class SqliteSessionManager(BaseSession):
     SqliteSessionManager - a session manager that uses SQLite.
     """
 
-    def __init__(self, db, model, ttl=None, ttl_unit='minutes'):
+    def __init__(self, dbname, model, ttl=None, ttl_unit='minutes'):
         """
-        :param db: a DataBase instance
+        :param str: database file path
         :param model: a Model instance
 
         Both model and db are currently use Peewee ORM, but it's easy to
         change this to another ORM.
         """
 
-        self.db = db
+        self.dbname = dbname
         self.model = model
+        self.db = self.model._meta.database
+        self.model._meta.database.init(self.dbname)
         self.db.connect()
         self.db.create_tables([model], safe=True)
 
@@ -71,21 +73,21 @@ class SqliteSessionManager(BaseSession):
                 TRIGGER_SQL.format(ttl, ttl_unit)
                            ).execute()
 
-        db.close()
+        self.db.close()
 
     def __setitem__(self, id, data):
         self.db.connect()
         self.model.create(id=id, data=data).save()
-        db.close()
+        self.db.close()
 
     def __getitem__(self, id):
         self.db.connect()
         data = self.model.select().where(self.model.id == id).get().data
-        db.close()
+        self.db.close()
         return data
 
     def __contains__(self, id):
         self.db.connect()
         rv = self.model.select().where(self.model.id == id).exists()
-        db.close()
+        self.db.close()
         return rv
