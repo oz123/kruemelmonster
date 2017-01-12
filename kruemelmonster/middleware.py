@@ -6,8 +6,8 @@ class SimpleSessionMiddleware:
     """
     This class uses the manager attribute instead of a wrapping
     function factory.
-    The manager is an instance of a simple class with magic attribute
-    which is easy to understand and extend.
+    The manager is an instance of a simple class with magic attributes
+    which are easy to understand and extend.
     """
 
     def __init__(self, app, session_manager=DictBasedSessionManager,
