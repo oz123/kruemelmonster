@@ -1,5 +1,5 @@
 from wsgiref.simple_server import make_server
-from wsgisession import SimpleSessionMiddleware
+from kruemelmonster import SimpleSessionMiddleware
 
 
 def wrapped_app(environ, start_response):
