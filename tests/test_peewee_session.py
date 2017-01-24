@@ -18,7 +18,7 @@ def setup_module(module):
 
 
 def test_session_db_created():
-    assert os.path.exists('sessions.db')
+    assert os.path.exists('foobar.db')
 
 
 def test_session_db_is_not_locked():
