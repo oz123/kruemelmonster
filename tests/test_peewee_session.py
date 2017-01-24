@@ -3,7 +3,7 @@ import os
 import sqlite3
 import time
 
-from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession, db
+from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession
 
 dbname = "foobar.db"
 session_manager = None
