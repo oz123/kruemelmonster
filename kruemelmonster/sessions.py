@@ -7,7 +7,6 @@ import peewee as pw
 
 from .base import BaseSession
 
-DATABASE = 'sessions.db'
 UNITS = ('days', 'hours', 'minutes', 'seconds')
 
 TRIGGER_SQL = """
@@ -20,14 +19,9 @@ END;
 
 # select strftime('%s', 'now') - strftime('%s', DATETIME('NOW', '-1 days'));
 
-# TODO:
 #
-# * Add tests
 # * Add support for json field
 #
-
-db = pw.SqliteDatabase(DATABASE)
-
 
 class PeeweeSession(pw.Model):
 
