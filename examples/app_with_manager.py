@@ -6,7 +6,7 @@ def wrapped_app(environ, start_response):
     session = environ.get('wsgisession')
     # google chrome sends 2 requests ...
     if environ['PATH_INFO'] != '/favicon.ico':
-        session['counter'] = session.get('counter', 0) + 1
+        session["counter"] = session.get("counter", 0) + 1
 
     start_response('200 OK', [('Content-Type', 'text/html')])
     return ['Visited {} times\n'.format(session['counter']).encode()]

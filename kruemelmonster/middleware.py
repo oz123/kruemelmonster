@@ -10,12 +10,12 @@ class SimpleSessionMiddleware:
     which are easy to understand and extend.
     """
 
-    def __init__(self, app, session_manager=DictBasedSessionManager,
+    def __init__(self, app, session_manager=DictBasedSessionManager(),
                  env_key='wsgisession', cookie_key='session_id'):
         self.app = app
         self.env_key = env_key
         self.cookie_key = cookie_key
-        self.manager = session_manager()
+        self.manager = session_manager
 
     def __call__(self, environ, start_response):
         cookie = SimpleCookie()

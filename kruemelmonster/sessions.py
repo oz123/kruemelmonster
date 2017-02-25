@@ -3,10 +3,11 @@ This file is distributed under the terms of the LGPL v3.
 Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
 import datetime
+import json
+
 import peewee as pw
 
 from .base import BaseSession
-
 UNITS = ('days', 'hours', 'minutes', 'seconds')
 
 TRIGGER_SQL = """
@@ -19,9 +20,6 @@ END;
 
 # select strftime('%s', 'now') - strftime('%s', DATETIME('NOW', '-1 days'));
 
-#
-# * Add support for json field
-#
 
 class PeeweeSession(pw.Model):
 
@@ -71,13 +69,15 @@ class SqliteSessionManager(BaseSession):
 
     def __setitem__(self, id, data):
         self.db.connect()
-        self.model.create(id=id, data=data).save()
+        query = self.model.update(id=id, data=json.dumps(data))
+        query.execute()
         self.db.close()
 
     def __getitem__(self, id):
         self.db.connect()
         data = self.model.select().where(self.model.id == id).get().data
         self.db.close()
+        data = json.loads(data)
         return data
 
     def __contains__(self, id):
