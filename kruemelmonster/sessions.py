@@ -3,6 +3,7 @@ This file is distributed under the terms of the LGPL v3.
 Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
 import datetime
+import inspect
 import json
 
 import peewee as pw
@@ -34,18 +35,33 @@ class PeeweeSession(pw.Model):
         db_table = 'sessions'
 
 
+def for_all_methods(decorator):
 
-def open_close_db(method):
+    def decorate(cls):
+        methods = inspect.getmembers(cls, predicate=inspect.ismethod)
+        for name, method in methods:
+            if name == '__init__':
+                continue
+            setattr(cls, name, decorator(method))
 
-    def wrap(*args, **kwargs):
-        inst = args[0]
-        inst.db.connect()
-        method(*args, **kwargs)
-        inst.db.close()
-
-    return wrap
+        return cls
+    return decorate
 
 
+def open_close_db(fn):
+    from functools import wraps
+
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        self.db.connect()
+        rv = fn(self, *args, **kwargs)
+        self.db.close()
+        return rv
+
+    return wrapper
+
+
+@for_all_methods(open_close_db)
 class SqliteSessionManager(BaseSession):
 
     """
@@ -78,20 +94,17 @@ class SqliteSessionManager(BaseSession):
 
         self.db.close()
 
-    @open_close_db
     def __setitem__(self, id, data):
         fields = {"id": id}
         fields.update({"data": json.dumps(data)})
         query = pw.InsertQuery(self.model, rows=[fields])
         query.upsert().execute()
 
-    @open_close_db
     def __getitem__(self, id):
         data = self.model.select().where(self.model.id == id).get().data
         data = json.loads(data)
         return data
 
-    @open_close_db
     def __contains__(self, id):
         rv = self.model.select().where(self.model.id == id).exists()
         return rv
