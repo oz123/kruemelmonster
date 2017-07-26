@@ -1,4 +1,3 @@
-import datetime as dt
 import os
 import sqlite3
 import time
@@ -8,13 +7,15 @@ from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession
 dbname = "foobar.db"
 session_manager = None
 
+
 def setup_module(module):
     global session_manager
     session_manager = SqliteSessionManager("foobar.db", PeeweeSession,
                                            ttl=None, ttl_unit='seconds')
 
-#def teardown_module(module):
-#    os.unlink('sessions.db')
+
+def teardown_module(module):
+    os.unlink('sessions.db')
 
 
 def test_session_db_created():
@@ -36,13 +37,17 @@ def test_no_trigger():
     cursor.execute(sql)
     data = cursor.fetchone()
     assert data is None
+    conn.close()
+
 
 def test_sessions_inserted():
     conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
     cursor.execute("select id, data from sessions;")
     sid, data = cursor.fetchone()
-    assert (sid, data) == ("abc", "it works")
+    assert (sid, data) == ("abc", '"it works"')
+    conn.close()
+
 
 def test_trigger_works():
     # add trigger
@@ -51,9 +56,11 @@ def test_trigger_works():
     conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
     time.sleep(1)
+    conn.close()
     session_manager['this'] = "deletes other sessions"
+
+    conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
     cursor.execute("select id from sessions;")
     data = cursor.fetchall()[0]
     assert data not in ("abc", "def")
-
