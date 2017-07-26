@@ -1,8 +1,13 @@
+from wsgiref.simple_server import make_server
+from kruemelmonster import SimpleSessionMiddleware
 from kruemelmonster.sessions import SqliteSessionManager, PeeweeSession
-from kruemelmonster.middleware import SimpleSessionMiddleware
+
+sqlite_manager = SqliteSessionManager("foobar.db", PeeweeSession,
+                                       ttl=None, ttl_unit='seconds')
 
 
-def app(environ, start_response):
+
+def wrapped_app(environ, start_response):
     session = environ.get('wsgisession')
     # google chrome sends 2 requests ...
     if environ['PATH_INFO'] != '/favicon.ico':
@@ -12,13 +17,11 @@ def app(environ, start_response):
     return ['Visited {} times\n'.format(session['counter']).encode()]
 
 
-session_manager = SqliteSessionManager("app.db", PeeweeSession,
-                                       ttl=None, ttl_unit='seconds')
+app = SimpleSessionMiddleware(wrapped_app, session_manager=sqlite_manager)
 
-app = SimpleSessionMiddleware(app, session_manager=session_manager)
 
 if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
     httpd = make_server('localhost', 8080, app)
     print("Listening on http://localhost:8080")
+
     httpd.serve_forever()
