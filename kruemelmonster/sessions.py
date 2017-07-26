@@ -69,8 +69,10 @@ class SqliteSessionManager(BaseSession):
 
     def __setitem__(self, id, data):
         self.db.connect()
-        query = self.model.update(id=id, data=json.dumps(data))
-        query.execute()
+        fields = {"id": id}
+        fields.update({"data": json.dumps(data)})
+        query = pw.InsertQuery(self.model, rows=[fields])
+        query.upsert().execute()
         self.db.close()
 
     def __getitem__(self, id):
