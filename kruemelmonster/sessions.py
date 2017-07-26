@@ -80,24 +80,18 @@ class SqliteSessionManager(BaseSession):
 
     @open_close_db
     def __setitem__(self, id, data):
-        #self.db.connect()
         fields = {"id": id}
         fields.update({"data": json.dumps(data)})
         query = pw.InsertQuery(self.model, rows=[fields])
         query.upsert().execute()
-        #self.db.close()
 
     @open_close_db
     def __getitem__(self, id):
-        #self.db.connect()
         data = self.model.select().where(self.model.id == id).get().data
-        #self.db.close()
         data = json.loads(data)
         return data
 
     @open_close_db
     def __contains__(self, id):
-        #self.db.connect()
         rv = self.model.select().where(self.model.id == id).exists()
-        #self.db.close()
         return rv
