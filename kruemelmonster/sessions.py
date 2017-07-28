@@ -2,9 +2,13 @@
 This file is distributed under the terms of the LGPL v3.
 Copyright Oz N Tiram <oz.tiram@gmail.com> 2016
 """
+import base64
 import datetime
+import hashlib
+import hmac
 import inspect
 import json
+import time
 
 import peewee as pw
 
@@ -62,18 +66,24 @@ def open_close_db(fn):
 
 
 @for_all_methods(open_close_db)
-class SqliteSessionManager(BaseSession):
+class SimpleSqliteSessionManager(BaseSession):
 
     """
     SqliteSessionManager - a session manager that uses SQLite.
+
+    This session manager class is dumb and saves the information
+    in the database and the cookie in clear text.
+
+    Do not use it in real production. Instead you should use
+    SafeSqliteSessionManager
     """
 
     def __init__(self, dbname, model, ttl=None, ttl_unit='minutes'):
         """
-        :param str: database file path
-        :param model: a Model instance
+        param str: database file path
+        param model: a Model instance
 
-        Both model and db are currently use Peewee ORM, but it's easy to
+        Both model and db are currently using Peewee ORM, but it's easy to
         change this to another ORM.
         """
 
@@ -108,3 +118,50 @@ class SqliteSessionManager(BaseSession):
     def __contains__(self, id):
         rv = self.model.select().where(self.model.id == id).exists()
         return rv
+
+
+class SafeSqliteSessionManager(SimpleSqliteSessionManager):
+
+    """
+    A Session manager that helps you save data in SQLite in safe manner.
+
+    It adds `load` and `save` methods that wrap your values properly.
+    """
+
+    def __init__(self, dbname, model, secret, hash=hashlib.sha256,
+                 ttl=None, ttl_unit='minutes'):
+        super().__init__(dbname, model, ttl, ttl_unit)
+        self.secrt = secret
+
+    def load(self, id):
+        data = super().__getitem__[id]
+        data = self.decrypt(data)
+        return data
+
+    def save(self, id, data):
+        data = json.dumps(data, indent=None, separators=(',', ':'))
+        data = self.encrypt(data)
+        super().__setitem__(id, data)
+        return data
+
+    def encrypt(self, value):
+        timestamp = str(int(time.time())).encode()
+        value = base64.b64encode(value.encode(self.encoding))
+        signature = self.create_signature(value, timestamp)
+        return "|".join([value.decode(self.encoding),
+                         timestamp.decode(self.encoding), signature])
+
+    def decrypt(self, value):
+        value, timestamp, signature = value.split("|")
+        check = self.create_signature(value.encode(self.encoding),
+                                      timestamp.encode())
+        if check != signature:
+            return None
+
+        return base64.b64decode(value).decode(self.encoding)
+
+    def _create_signature(self, value, timestamp):
+        h = hmac.new(self.secret.encode(), digestmod=self.hash)
+        h.update(timestamp)
+        h.update(value)
+        return h.hexdigest()
