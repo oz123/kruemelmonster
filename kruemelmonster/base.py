@@ -79,6 +79,9 @@ class SimpleSession:
         return default
 
     def load(self, id):
+        """
+        load returns a new session id if it is not already found
+        """
         if id in self.manager:
             self.data = self.manager[id]
             self.id = id
