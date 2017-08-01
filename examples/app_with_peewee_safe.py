@@ -1,8 +1,8 @@
 from wsgiref.simple_server import make_server
-from kruemelmonster import SimpleSessionMiddleware
 from kruemelmonster.sessions import SafeSqliteSessionManager, PeeweeSession
+from kruemelmonster.middleware import SafeSessionMiddleware
 
-sqlite_manager = SafeSqliteSessionManager("foobar.db", PeeweeSession,
+sqlite_safe = SafeSqliteSessionManager("foobar.db", PeeweeSession,
                                           "very-sekret-key",
                                           ttl=None, ttl_unit='seconds')
 
@@ -17,7 +17,7 @@ def wrapped_app(environ, start_response):
     return ['Visited {} times\n'.format(session['counter']).encode()]
 
 
-app = SimpleSessionMiddleware(wrapped_app, session_manager=sqlite_manager)
+app = SafeSessionMiddleware(wrapped_app, session_manager=sqlite_safe)
 
 
 if __name__ == '__main__':
