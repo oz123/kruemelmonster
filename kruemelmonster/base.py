@@ -4,16 +4,24 @@ import uuid
 
 class BaseSessionMeta(type):
 
-    def __new__(meta, name, bases, class_dict):
+    def __new__(meta, name, superclasses, class_dict):
         # Don’t validate the abstract BaseSession class
-        if bases != (object,):
+        if superclasses != (object,):
             for item in ['__setitem__', '__getitem__', '__contains__']:
-                method = class_dict.get(item)
-                if not method or not inspect.isfunction(method):
-                    raise ValueError(
-                        '{} must define a method called {}'.format(name, item))
+                found_in_super = False
+                for klass in superclasses:
+                    method = klass.__dict__.get(item)
+                    if method and inspect.isfunction(method):
+                        found_in_super = True
+                        break
+                if not found_in_super:
+                    method = class_dict.get(item)
+                    if not method or not inspect.isfunction(method):
+                        raise ValueError(
+                            '{} must define a method called {}'.format(name,
+                                                                       item))
 
-        return type.__new__(meta, name, bases, class_dict)
+        return type.__new__(meta, name, superclasses, class_dict)
 
 
 class BaseSession(object, metaclass=BaseSessionMeta):
