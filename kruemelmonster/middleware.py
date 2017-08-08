@@ -1,4 +1,4 @@
-from .base import DictBasedSessionManager, SimpleSession
+from .base import DictBasedSessionManager, SimpleSession, SafeSession
 from http.cookies import SimpleCookie
 
 
@@ -49,10 +49,10 @@ class SafeSessionMiddleware:
 
     The safe session middleware saves the session data in the DB and the
     user cookie in an encrypted manner. Data is stored in the cookie
-    with a signature key used to make sure the data was not tampered with. 
+    with a signature key used to make sure the data was not tampered with.
     """
 
-    def __init__(self, app, session_manager=DictBasedSessionManager(),
+    def __init__(self, app, session_manager=None,
                  env_key='wsgisession', cookie_key='session_id'):
         self.app = app
         self.env_key = env_key
@@ -66,7 +66,7 @@ class SafeSessionMiddleware:
         id = None
         if self.cookie_key in cookie:
             id = cookie[self.cookie_key].value
-        session = SimpleSession(self.manager)
+        session = SafeSession(self.manager)
         session.load(id)
         environ[self.env_key] = session
 

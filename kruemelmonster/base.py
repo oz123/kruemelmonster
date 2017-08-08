@@ -100,3 +100,12 @@ class SimpleSession:
     def save(self):
         self.manager[self.id] = self.data
         return self.id
+
+
+class SafeSession(SimpleSession):
+
+    def save(self):
+        self.manager.save(self.id, self.data)
+        return self.id
+
+

@@ -127,11 +127,18 @@ class SafeSqliteSessionManager(SimpleSqliteSessionManager):
 
     It adds `load` and `save` methods that wrap your values properly.
     """
+    encoding = 'utf-8'
 
     def __init__(self, dbname, model, secret, hash=hashlib.sha256,
                  ttl=None, ttl_unit='minutes'):
         super().__init__(dbname, model, ttl, ttl_unit)
-        self.secrt = secret
+        self.secret = secret
+
+    def create_signature(self, value, timestamp):
+        h = hmac.new(self.secret.encode(), digestmod=hashlib.sha1)
+        h.update(timestamp)
+        h.update(value)
+        return h.hexdigest()
 
     def load(self, id):
         data = super().__getitem__[id]

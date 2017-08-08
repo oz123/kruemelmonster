@@ -3,8 +3,8 @@ from kruemelmonster.sessions import SafeSqliteSessionManager, PeeweeSession
 from kruemelmonster.middleware import SafeSessionMiddleware
 
 sqlite_safe = SafeSqliteSessionManager("foobar.db", PeeweeSession,
-                                          "very-sekret-key",
-                                          ttl=None, ttl_unit='seconds')
+                                       "very-sekret-key",
+                                       ttl=None, ttl_unit='seconds')
 
 
 def wrapped_app(environ, start_response):
@@ -12,7 +12,6 @@ def wrapped_app(environ, start_response):
     # google chrome sends 2 requests ...
     if environ['PATH_INFO'] != '/favicon.ico':
         session["counter"] = session.get("counter", 0) + 1
-
     start_response('200 OK', [('Content-Type', 'text/html')])
     return ['Visited {} times\n'.format(session['counter']).encode()]
 
