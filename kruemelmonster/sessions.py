@@ -141,7 +141,7 @@ class SafeSqliteSessionManager(SimpleSqliteSessionManager):
         return h.hexdigest()
 
     def load(self, id):
-        data = super().__getitem__[id]
+        data = super().__getitem__(id)
         data = self.decrypt(data)
         return data
 

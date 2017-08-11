@@ -108,4 +108,8 @@ class SafeSession(SimpleSession):
         self.manager.save(self.id, self.data)
         return self.id
 
+    def __setitem__(self, key, value):
+        self.manager.save(key, value)
 
+    def __getitem__(self, key):
+        return self.manager.load(key)

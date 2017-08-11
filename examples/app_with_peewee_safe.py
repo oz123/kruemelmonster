@@ -11,9 +11,12 @@ def wrapped_app(environ, start_response):
     session = environ.get('wsgisession')
     # google chrome sends 2 requests ...
     if environ['PATH_INFO'] != '/favicon.ico':
-        session["counter"] = session.get("counter", 0) + 1
-    start_response('200 OK', [('Content-Type', 'text/html')])
-    return ['Visited {} times\n'.format(session['counter']).encode()]
+        count = session.get("counter", 0)
+        count =+ 1
+        session["counter"] = count
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        times_visited = session['counter']
+    return ['Visited {} times\n'.format(times_visited).encode()]
 
 
 app = SafeSessionMiddleware(wrapped_app, session_manager=sqlite_safe)
